@@ -1,0 +1,104 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "首页",//设置页面标题文字
+				"onReachBottomDistance":100
+			}
+		},
+		{
+			"path": "pages/seach/seach",
+			"style": {
+				"navigationBarTitleText": "搜索",
+				"onReachBottomDistance":100
+			}
+		},
+		{
+			"path": "pages/seachProduct/seachProduct",
+			"style": {
+				"navigationBarTitleText": "搜索",
+				"onReachBottomDistance":100
+			}
+		},
+		{
+			"path": "pages/product/product",
+			"style": {
+				"navigationBarTitleText": "水电",
+				"onReachBottomDistance":100
+			}
+		},
+		{
+			"path": "pages/productDetail/productDetail",
+			"style": {
+				"navigationBarTitleText": "详情",
+				"onReachBottomDistance":100
+			}
+		},
+		{
+			"path": "pages/orderConfirm/orderConfirm",
+			"style": {
+				"navigationBarTitleText": "立即预约",
+				"onReachBottomDistance":100
+			}
+		},
+		{
+			"path": "pages/user_address/user_address",
+			"style": {
+				"navigationBarTitleText": "我的地址",
+				"onReachBottomDistance":100
+			}
+		},
+		{
+			"path": "pages/user_addressAdd/user_addressAdd",
+			"style": {
+				"navigationBarTitleText": "添加地址",
+				"onReachBottomDistance":100
+			}
+		},
+		{
+			"path": "pages/user/user",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"onReachBottomDistance":100,
+				"navigationStyle":"custom"
+			}
+		},
+		{
+			"path": "pages/contactUs/contactUs",
+			"style": {
+				"navigationBarTitleText": "联系我们",
+				"onReachBottomDistance":100
+			}
+		},
+		{
+			"path": "pages/userOrder/userOrder",
+			"style": {
+				"navigationBarTitleText": "我的订单",
+				"onReachBottomDistance":100
+			}
+		},
+		{
+			"path": "pages/userOrderDetail/userOrderDetail",
+			"style": {
+				"navigationBarTitleText": "订单详情",
+				"onReachBottomDistance":100
+			}
+		}
+		
+    ],
+	"globalStyle": {
+		//"navigationStyle":"custom",
+		"navigationBarTextStyle": "black",//导航栏文字蓝色
+		"navigationBarTitleText": "大匠行",
+		"navigationBarBackgroundColor": "#fff"
+	},
+	"condition": { //模式配置，仅开发期间生效
+		"current": 0, //当前激活的模式(list 的索引项)
+		"list": [{
+			"name": "", //模式名称
+			"path": "", //启动页面，必选
+			"query": "" //启动参数，在页面的onLoad函数里面得到
+		}]
+	}
+}
