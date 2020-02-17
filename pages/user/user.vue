@@ -5,9 +5,13 @@
 		<view class="userHead white pdlr4">
 			<view class="infor">
 				<view class="left flex">
-					<image class="photo" src="../../static/images/about-img.png" mode=""></image>
+					<view class="photo"
+					style="width: 120rpx;height: 120rpx;border-radius: 50%;overflow: hidden;">
+						<open-data type="userAvatarUrl"></open-data>
+					</view>
+					
 					<view style="width: 70%;">
-						<view class="fs14 pdb5">昵称昵称昵称昵称</view>
+						<view class="fs14 pdb5"><open-data type="userNickName"></open-data></view>
 					</view>
 				</view>
 			</view>
@@ -20,19 +24,19 @@
 					<view class="more flexEnd fs12 color9" @click="Router.navigateTo({route:{path:'/pages/userOrder/userOrder'}})">全部订单<image class="arrowR" src="../../static/images/about-icon6.png" mode=""></image></view>
 				</view>
 				<view class="menu flexRowBetween color6 fs12 pdtb15 center">
-					<view class="item" @click="Router.navigateTo({route:{path:'/pages/userOrder/userOrder'}})">
+					<view class="item" @click="Router.navigateTo({route:{path:'/pages/userOrder/userOrder?current=2'}})">
 						<image src="../../static/images/about-icon1.png"></image>
 						<view>待支付</view>
 					</view>
-					<view class="item" @click="Router.navigateTo({route:{path:'/pages/userOrder/userOrder'}})">
+					<view class="item" @click="Router.navigateTo({route:{path:'/pages/userOrder/userOrder?current=3'}})">
 						<image src="../../static/images/about-icon2.png"></image>
-						<view>待发货</view>
+						<view>待接单</view>
 					</view>
-					<view class="item" @click="Router.navigateTo({route:{path:'/pages/userOrder/userOrder'}})">
+					<view class="item" @click="Router.navigateTo({route:{path:'/pages/userOrder/userOrder?current=4'}})">
 						<image src="../../static/images/about-icon3.png"></image>
-						<view>待收货</view>
+						<view>服务中</view>
 					</view>
-					<view class="item" @click="Router.navigateTo({route:{path:'/pages/userOrder/userOrder'}})" >
+					<view class="item" @click="Router.navigateTo({route:{path:'/pages/userOrder/userOrder?current=5'}})" >
 						<image src="../../static/images/about-icon4.png"></image>
 						<view>已完成</view>
 					</view>

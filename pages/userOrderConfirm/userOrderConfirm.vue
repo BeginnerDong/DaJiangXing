@@ -5,38 +5,37 @@
 				<view class="flex">
 					<image class="w" style="" src="../../static/images/the-order-img.png" mode="widthFix"></image>
 				</view>
-				<view class="flexRowBetween pdtb15 mglr4" @click="Router.navigateTo({route:{path:'/pages/user_address/user_address'}})">
-					<view class="fs13"  v-if="addressData.name">
+				<view class="flexRowBetween pdtb15 mglr4">
+					<view class="fs13">
 						<view>{{addressData.city+addressData.detail}}</view>
 						<view class="color6 flex mgt5">
 							<view class="mgr10">{{addressData.name}}</view>
 							<view class="">{{addressData.phone}}</view>
 						</view>
 					</view>
-					<view class="fs13" v-else>
-						<view>请选择收货地址</view>
-					</view>
-					<view class="flexEnd" style="width: 20%;">
+					<!-- <view class="flexEnd" style="width: 20%;">
 						<image class="arrowR" src="../../static/images/about-icon6.png" mode=""></image>
-					</view>
+					</view> -->
 				</view>
-				
+
 			</view>
 
 			<view class="proRow radius10 whiteBj mgb15">
-				<view class="item flexRowBetween" v-for="item in mainData">
+				<view class="item flexRowBetween">
 					<view class="pic">
-						<image :src="item.product&&item.product.mainImg&&item.product.mainImg[0]?item.product.mainImg[0].url:''" mode=""></image>
+						<image :src="mainData.orderItem&&mainData.orderItem[0]&&mainData.orderItem[0].snap_product&&
+							mainData.orderItem[0].snap_product.mainImg&&mainData.orderItem[0].snap_product.mainImg[0]?mainData.orderItem[0].snap_product.mainImg[0].url:''"
+						 mode=""></image>
 					</view>
 					<view class="infor">
-						<view class="title avoidOverflow fs13 mgt5">{{item.product&&item.product.title?item.product.title:''}}</view>
+						<view class="title avoidOverflow fs13 mgt5">{{mainData.title}}</view>
 						<view class="flexRowBetween B-price">
-							<view class="price fs14">{{item.product&&item.product.title?item.product.price:''}}</view>
+							<view class="price fs14">{{mainData.price}}</view>
 							<view class="flexEnd">
-								<view class="numBox flex">
-									<view @click="counter('-')">-</view>
-									<view class="num pubColor">{{item.count}}</view>
-									<view @click="counter('+')">+</view>
+								<view class=" flex">
+
+									<view class="">x{{mainData.count}}</view>
+
 								</view>
 							</view>
 						</view>
@@ -49,7 +48,7 @@
 					<view class="item flexRowBetween">
 						<view class="ll fs13">微信号</view>
 						<view class="rr fs12">
-							<input type="text" v-model="wechat" placeholder="请输入微信号,以便客服联系" placeholder-class="placeholder" />
+							<input type="text" v-model="wechat" disabled="true" placeholder="请输入微信号,以便客服联系" placeholder-class="placeholder" />
 						</view>
 					</view>
 				</view>
@@ -60,13 +59,11 @@
 		<!-- 底部菜单按钮 -->
 		<view class="xqbotomBar flexRowBetween" style="height: 100rpx;">
 			<view class="left flex mgl15">
-				<view class="fs16 price">{{totalPrice}}</view>
+				<view class="fs16 price">{{mainData.price}}</view>
 			</view>
-			<button class="payBtn fs16 white" open-type="getUserInfo"  @getuserinfo="Utils.stopMultiClick(submit)">确认预约</button>
+			<button class="payBtn fs16 white" open-type="getUserInfo" @getuserinfo="Utils.stopMultiClick(goPay)">立即支付</button>
 		</view>
 		<!-- 底部菜单按钮 end -->
-
-
 	</view>
 </template>
 
@@ -75,66 +72,65 @@
 		data() {
 			return {
 				Router: this.$Router,
-				Utils:this.$Utils,
-				showView: false,
-				wx_info: {},
-				is_show: false,
-				is_tmptShow: false,
-				count: 1,
-				wechat:'',
-				mainData:[],
-				addressData:{},
-				totalPrice:0,
-				pay:{},
+				Utils: this.$Utils,
+
+				wechat: '',
+				mainData: {},
+				addressData: {},
+				totalPrice: 0,
+				pay: {},
+				id:''
 			}
 		},
-		onLoad() {
+
+		onLoad(options) {
 			const self = this;
-			self.mainData = uni.getStorageSync('payPro');
-			self.countTotalPrice()
+			
+			self.id = options.id;
+			self.$Utils.loadAll(['getMainData'], self)
 		},
 
-		onShow() {
-			const self = this;
-			if (uni.getStorageSync('choosedAddressData')) {
-				self.addressData = uni.getStorageSync('choosedAddressData')
 
-			} else {
-				self.getAddressData()
-			};
-		},
 
 		methods: {
-			
 
-			getAddressData() {
+
+			getMainData() {
 				const self = this;
+				console.log(23435345)
 				const postData = {};
 				postData.tokenFuncName = 'getProjectToken';
 				postData.searchItem = {
-					isdefault: 1
+					id: self.id
+				};
+				postData.getAfter = {
+					orderItem: {
+						tableName: 'OrderItem',
+						middleKey: 'order_no',
+						key: 'order_no',
+						searchItem: {
+							status: 1
+						},
+						condition: '='
+					},
 				};
 				const callback = (res) => {
 					if (res.info.data.length > 0) {
-						self.addressData = res.info.data[0];
+						self.mainData = res.info.data[0];
+						self.addressData = self.mainData.snap_address;
+						self.wechat = self.mainData.wechat;
+						self.pay.wxPay = {
+							price: self.mainData.price,
+						};
 					}
+					self.$Utils.finishFunc('getMainData');
 				};
-				self.$apis.addressGet(postData, callback);
+				self.$apis.orderGet(postData, callback);
 			},
 
-			counter(type) {
-				const self = this;
-				if (type == '+') {
-					self.mainData[0].count++;
-				} else {
-					if (self.mainData[0].count > 1) {
-						self.mainData[0].count--;
-					}
-				};
-				self.countTotalPrice();
-			},
 
-			countTotalPrice() {
+
+			/* countTotalPrice() {
 				const self = this;
 				self.totalPrice = 0;
 				for (var i = 0; i < self.mainData.length; i++) {
@@ -150,73 +146,19 @@
 					delete self.pay.wxPay;
 				};
 				console.log(self.pay)
-			},
+			}, */
 
-			submit() {
+
+
+			goPay(order_id) {
 				const self = this;
 				uni.setStorageSync('canClick', false);
 
-
-				if (JSON.stringify(self.addressData) == '{}') {
-					uni.setStorageSync('canClick', true);
-					self.$Utils.showToast('请选择收货地址', 'none')
-					return
-				};
-				if (self.wechat == '') {
-					uni.setStorageSync('canClick', true);
-					self.$Utils.showToast('请输入微信号', 'none')
-					return
-				};
-				var data = {
-					wechat:self.wechat
-				}
-				var orderList = [{
-					product_id: self.mainData[0].product_id,
-					count: self.mainData[0].count,
-					type: 1,
-					data: data,
-					snap_address: self.addressData
-				}];
-				const callback = (user, res) => {
-					self.addOrder(orderList)
-				};
-				self.$Utils.getAuthSetting(callback);
-			},
-			
-			addOrder(orderList) {
-				const self = this;	
-				/* if(self.orderId){
-					self.goPay()
-					return
-				}; */
-				const postData = {}; 
-				postData.orderList = self.$Utils.cloneForm(orderList);
-				postData.data = {};
-				postData.tokenFuncName = 'getProjectToken';
-				const callback = (res) => {
-					uni.setStorageSync('canClick', true);
-					if (res && res.solely_code == 100000) {
-						self.orderId = res.info.id;
-						self.goPay()
-					} else {		
-						uni.showToast({
-							title: res.msg,
-							duration: 2000
-						});
-					};		
-				};
-				self.$apis.addOrder(postData, callback);
-			},
-			
-			goPay(order_id) {
-				const self = this;	
-				uni.setStorageSync('canClick',false);
-				
-				const postData = self.$Utils.cloneForm(self.pay)	
+				const postData = self.$Utils.cloneForm(self.pay)
 				postData.tokenFuncName = 'getProjectToken',
-				postData.searchItem = {
-					id: self.orderId
-				};	
+					postData.searchItem = {
+						id: self.id
+					};
 				const callback = (res) => {
 					if (res.solely_code == 100000) {
 						uni.setStorageSync('canClick', true);
@@ -228,12 +170,14 @@
 										title: '支付成功',
 										duration: 1000,
 										success: function() {
-											
+
 										}
 									});
 									setTimeout(function() {
-										
-										self.$Router.redirectTo({route:{path:'/pages/userOrder/userOrder'}})
+
+										uni.navigateBack({
+											delta: 1
+										})
 									}, 1000);
 								} else {
 									uni.setStorageSync('canClick', true);
@@ -245,17 +189,18 @@
 							};
 							self.$Utils.realPay(res.info, payCallback);
 						} else {
-							
+
 							uni.showToast({
 								title: '支付成功',
 								duration: 1000,
 								success: function() {
-									
+
 								}
 							});
 							setTimeout(function() {
-								
-								self.$Router.redirectTo({route:{path:'/pages/userOrder/userOrder'}})
+								uni.navigateBack({
+									delta: 1
+								})
 							}, 1000);
 						};
 					} else {
@@ -280,7 +225,8 @@
 		background: #F5F5F5;
 		padding-bottom: 120rpx;
 	}
-	button{
+
+	button {
 		background: none;
 		line-height: 1.5;
 		margin-left: 0;
@@ -288,9 +234,11 @@
 		font-size: 16px;
 		border-radius: 0;
 	}
-	button::after{
+
+	button::after {
 		border: none;
 	}
+
 	.proRow .item {
 		padding: 30rpx 4%;
 	}

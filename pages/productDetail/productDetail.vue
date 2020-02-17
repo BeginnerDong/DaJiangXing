@@ -2,20 +2,20 @@
 	<view>
 		
 		<view class="detailxqBan">
-			<image src="../../static/images/details-img.png" mode=""></image>
+			<image :src="mainData.bannerImg&&mainData.bannerImg[0]?mainData.bannerImg[0].url:''" mode=""></image>
 		</view>
 		<view class="mglr4 pdtb15 fs15">
-			<view class="tit mgb10">电路检修</view>
-			<view class="ftw pubColor"><span class="ftn fs14">￥</span>135</view>
+			<view class="tit mgb10">{{mainData.title}}</view>
+			<view class="ftw pubColor"><span class="ftn fs14">￥</span>{{mainData.price}}</view>
 		</view>
 		<view class="f5H10"></view>
 		<view class="mglr4 pdtb15">
 			<view class="ftw fs15 pdb10">详情介绍</view>
 			<view class="xqInfor fs13">
 				<view class="cont">
-					<view>管理客服电话还房贷两个号和个梵蒂冈悲愤交加鹤骨鸡肤供货方点击可供货方都拉黑干活的放假开个会过分的话看</view>
-					<view>花港饭店两三个号换个卡富家大室联合国利干活附近的开个会发和公交卡方大化工干活附近的看和</view>
-					<view><image class="w" src="../../static/images/details-img1.png" mode="widthFix"></image></view>
+					<view class="content ql-editor" style="padding:0;"
+					v-html="mainData.content">
+					</view>
 				</view>
 			</view>
 		</view>
@@ -25,8 +25,8 @@
 				<view><image src="../../static/images/details-icon.png" mode=""></image></view>
 				<view  class="mgt5">电话客服</view>
 			</view>
-			<view class="submitbtn" style="width: 70%;" @click="Router.navigateTo({route:{path:'/pages/orderConfirm/orderConfirm'}})">
-				<button class="Wbtn" type="button">立即预约</button>
+			<view class="submitbtn" style="width: 70%;" @click="Utils.stopMultiClick(goBuy)">
+				<button class="Wbtn" type="button" >立即预约</button>
 			</view>
 		</view>
 		
@@ -38,30 +38,66 @@
 		data() {
 			return {
 				Router:this.$Router,
-				showView: false,
-				wx_info:{},
-				is_show:false
+				mainData:{},
+				Utils:this.$Utils,
 			}
 		},
 		
-		onLoad() {
+		onLoad(options) {
 			const self = this;
-			// self.$Utils.loadAll(['getMainData'], self);
+			self.id = options.id;
+			self.$Utils.loadAll(['getMainData'], self);
 		},
+		
+		onShow() {
+			const self = this;
+			self.orderList = [];
+			uni.removeStorageSync('payPro');
+		},
+		
 		methods: {
+			
+			goBuy(){
+				const self = this;
+				uni.setStorageSync('canClick',false);
+				self.orderList.push(
+					{product_id:self.mainData.id,count:1,
+					type:1,product:self.mainData},
+				);
+				uni.setStorageSync('payPro', self.orderList);
+				
+				self.Router.navigateTo({route:{path:'/pages/orderConfirm/orderConfirm'}})
+				
+				uni.setStorageSync('canClick',true);
+			},
+			
 			//拨打客服电话
 			tel(){
+				const self = this;
 				uni.makePhoneCall({
-					phoneNumber: '18932145667' //仅为示例
+					phoneNumber: self.mainData.phone //仅为示例
 				});
 			},
+			
 			getMainData() {
 				const self = this;
-				console.log('852369')
 				const postData = {};
-				postData.tokenFuncName = 'getProjectToken';
-				self.$apis.orderGet(postData, callback);
-			}
+				postData.searchItem = {
+					thirdapp_id: 2,
+					id: self.id
+				};
+				const callback = (res) => {
+					if (res.info.data.length > 0) {
+						self.mainData = res.info.data[0];
+						const regex = new RegExp('<img', 'gi');
+						self.mainData.content = self.mainData.content.replace(regex, `<img style="max-width: 100%;"`);
+					}
+					console.log('self.mainData', self.mainData)
+					self.$Utils.finishFunc('getMainData');
+				};
+				self.$apis.productGet(postData, callback);
+			},
+			
 		}
 	};
 </script>

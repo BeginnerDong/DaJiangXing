@@ -43,6 +43,13 @@
 			}
 		},
 		{
+			"path": "pages/userOrderConfirm/userOrderConfirm",
+			"style": {
+				"navigationBarTitleText": "支付",
+				"onReachBottomDistance":100
+			}
+		},
+		{
 			"path": "pages/user_address/user_address",
 			"style": {
 				"navigationBarTitleText": "我的地址",

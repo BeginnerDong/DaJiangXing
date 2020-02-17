@@ -5,17 +5,17 @@
 			<view class="flex rr" style="width: 85%;">
 				<button class="seachBtn" type="button"></button>
 				<view class="input">
-					<input type="text" name="" value="" placeholder="活动" placeholder-class="placeholder" />
+					 <input type="text" v-model="keywords" placeholder="输入关键字搜索" placeholder-class="placeholder" />
 				</view>
 				<view class="delt flex"><text>×</text></view>
 			</view>
-			<view class="fs15 pubColor" @click="Router.navigateTo({route:{path:'/pages/seachProduct/seachProduct'}})">搜索</view>
+			<view class="fs15 pubColor" @click="search">搜索</view>
 		</view>
 		<view class="pdlr4 borderB1">
 			
 			<view class="fs15 pdt20 pdb10 ftw">搜索记录</view>
 			<view class="historyDate  center fs13 flex">
-				<view class="item" v-for="(item,index) in historyDate" :key="index">{{item}}</view>
+				<view class="item" v-for="(item,index) in historyDate" @click="clickSearch(item)"  :key="index">{{item}}</view>
 			</view>
 		</view>
 		
@@ -30,7 +30,7 @@
 			<view class="fs13 color6 pdb20 borderB1">确定清空搜索记录吗？</view>
 			<view class="flex tip-button">
 				<view class="item"  @click="popupShow">取消</view>
-				<view class="item pubColor">确定</view>
+				<view class="item pubColor" @click="clearHistory()">确定</view>
 			</view>
 		</view>
 		
@@ -45,15 +45,23 @@
 				showView: false,
 				wx_info:{},
 				is_show:false,
-				historyDate:['维修','疏通','墙面'],
-				is_popupShow:false
+				mainData:[],
+				historyDate:[],
+				is_popupShow:false,
+				keywords:''
 			}
 		},
 		
 		onLoad(options) {
 			const self = this;
-			// self.$Utils.loadAll(['getMainData'], self);
+			console.log(uni.getStorageSync('historyDate'))
+			if(uni.getStorageSync('historyDate')){
+				self.historyDate = uni.getStorageSync('historyDate')
+			};
+			console.log(self.historyDate)
+			
 		},
+		
 		methods: {
 			popupShow(){
 				const self=this;
@@ -61,13 +69,31 @@
 				self.is_show = !self.is_show;
 				
 			},
-			getMainData() {
+			
+			clickSearch(item){
 				const self = this;
-				console.log('852369')
-				const postData = {};
-				postData.tokenFuncName = 'getProjectToken';
-				self.$apis.orderGet(postData, callback);
-			}
+				self.Router.navigateTo({route:{path:'/pages/seachProduct/seachProduct?keywords='+item}});
+			},
+			
+			search(){
+				const self = this;
+				if(self.keywords!=''){
+					self.Router.navigateTo({route:{path:'/pages/seachProduct/seachProduct?keywords='+self.keywords}});
+					self.historyDate.push(self.keywords);
+					uni.setStorageSync('historyDate',self.historyDate);
+					self.keywords = '';
+				}else{
+					return
+				}
+			},
+			
+			clearHistory(){
+				const self = this;
+				self.historyDate = [];
+				uni.removeStorageSync('historyDate');
+				self.is_popupShow = !self.is_popupShow;
+				self.is_show = !self.is_show;
+			},
 		}
 	};
 </script>

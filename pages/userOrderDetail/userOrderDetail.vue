@@ -5,10 +5,10 @@
 				<view class="flex"><image class="w" style="" src="../../static/images/the-order-img.png" mode="widthFix"></image></view>
 				<view class="pdtb15 mglr4">
 					<view class="fs13">
-						<view>陕西省西安市雁塔区高新大都荟</view>
+						<view>{{addressData.city+addressData.detail}}</view>
 						<view class="color6 flex mgt5">
-							<view class="mgr10">张思德</view>
-							<view class="">15689562352</view>
+							<view class="mgr10">{{addressData.name}}</view>
+							<view class="">{{addressData.phone}}</view>
 						</view>
 					</view>
 				</view>
@@ -17,17 +17,21 @@
 			<view class="proRow radius10 whiteBj mgb15">
 				<view class="item">
 					<view class="flexRowBetween fs12 mgb10">
-						<view class="color9">交易时间：2018-08-30</view>
-						<view class="red">待接单</view>
+						<view class="color9">交易时间：{{mainData.create_time}}</view>
+						<view class="red" v-if="mainData.pat_status==0">待支付</view>
+						<view class="red" v-if="mainData.pat_status==1&&mainData.transport_status==0">待接单</view>
+						<view class="red" v-if="mainData.pat_status==1&&mainData.transport_status==1">服务中</view>
+						<view class="red" v-if="mainData.pat_status==1&&mainData.transport_status==2">已完成</view>
 					</view>
 					<view class="flexRowBetween">
 						<view class="pic">
-							<image src="../../static/images/the-order-img1.png" mode=""></image>
+							<image :src="mainData.orderItem&&mainData.orderItem[0]&&mainData.orderItem[0].snap_product&&
+							mainData.orderItem[0].snap_product.mainImg&&mainData.orderItem[0].snap_product.mainImg[0]?mainData.orderItem[0].snap_product.mainImg[0].url:''" mode=""></image>
 						</view>
 						<view class="infor">
-							<view class="title avoidOverflow fs13 mgt5">马桶堵塞</view>
+							<view class="title avoidOverflow fs13 mgt5">{{mainData.title}}</view>
 							<view class="flexRowBetween B-price">
-								<view class="price fs14">56.00</view>
+								<view class="price fs14">{{mainData.price}}</view>
 							</view>
 						</view>
 					</view>
@@ -38,15 +42,15 @@
 				<view class="myRowBetween pdlr4">
 					<view class="item flexRowBetween">
 						<view class="ll fs13">微信号</view>
-						<view class="rr fs12">15623256565</view>
+						<view class="rr fs12">{{mainData.wechat}}</view>
 					</view>
 				</view>
 			</view>
 			
 		</view>
 		
-		<view class="submitbtn" style="margin-top: 200rpx;">
-			<button class="btn" type="button">确认完成</button>
+		<view class="submitbtn" style="margin-top: 200rpx;"  v-if="mainData.pat_status==1&&mainData.transport_status==1">
+			<button class="btn" type="button" @click="Utils.stopMultiClick(orderUpdate)">确认完成</button>
 		</view>
 		
 		 
@@ -58,24 +62,78 @@
 		data() {
 			return {
 				Router:this.$Router,
-				showView: false,
-				wx_info:{},
-				is_show:false,
-				is_tmptShow:false
+				Utils:this.$Utils,
+				mainData:{},
+				id:-1,
+				addressData:{}
 			}
 		},
 		onLoad(options) {
 			const self = this;
-			// self.$Utils.loadAll(['getMainData'], self);
+			
+			self.id = options.id;
+			self.$Utils.loadAll(['getMainData'], self)
 		},
+		
 		methods: {
-			getMainData() {
+			
+			orderUpdate() {
 				const self = this;
-				console.log('852369')
+				uni.setStorageSync('canClick', false);
 				const postData = {};
 				postData.tokenFuncName = 'getProjectToken';
+				postData.data = {
+					transport_status:2
+				};
+				postData.searchItem = {
+					id:self.id,
+				};
+				const callback = (data) => {
+					uni.setStorageSync('canClick', true);
+					if (data && data.solely_code == 100000) {
+						self.$Utils.showToast('操作成功','none');
+						setTimeout(function() {
+							uni.navigateBack({
+								delta:1
+							})
+						}, 1000);
+					} else {
+						self.$Utils.showToast(data.msg,'none')
+					}
+				};
+				self.$apis.orderUpdate(postData, callback);
+			 },
+			
+			getMainData() {
+				const self = this;
+				console.log(23435345)
+				const postData = {};
+				postData.tokenFuncName = 'getProjectToken';
+				postData.searchItem = {
+					id: self.id
+				};
+				postData.getAfter = {
+					orderItem: {
+						tableName: 'OrderItem',
+						middleKey: 'order_no',
+						key: 'order_no',
+						searchItem: {
+							status: 1
+						},
+						condition: '='
+					},
+				};
+				const callback = (res) => {
+					if (res.info.data.length > 0) {
+						self.mainData = res.info.data[0];
+						self.addressData = self.mainData.snap_address;
+						
+						
+					}
+					self.$Utils.finishFunc('getMainData');
+				};
 				self.$apis.orderGet(postData, callback);
-			}
+			},
 		}
 	};
 </script>

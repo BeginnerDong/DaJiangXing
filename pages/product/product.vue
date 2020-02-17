@@ -1,11 +1,12 @@
 <template>
 	<view>
 		<view class="mglr4 flexRowBetween productList pdtb15">
-			<view class="item radius10" v-for="(item,index) in productData" :key="index" @click="Router.navigateTo({route:{path:'/pages/productDetail/productDetail'}})">
-				<view class="pic"><image src="../../static/images/goods-img.png" mode=""></image></view>
+			<view class="item radius10" v-for="(item,index) in mainData" :key="index" :data-id="item.id"
+			@click="Router.navigateTo({route:{path:'/pages/productDetail/productDetail?id='+$event.currentTarget.dataset.id}})">
+				<view class="pic"><image :src="item.mainImg&&item.mainImg[0]?item.mainImg[0].url:''" mode=""></image></view>
 				<view class="infor">
-					<view class="tit avoidOverflow">洗衣机清洗</view>
-					<view class="price">56</view>
+					<view class="tit avoidOverflow">{{item.title}}</view>
+					<view class="price">{{item.price}}</view>
 				</view>
 				
 			</view>
@@ -22,22 +23,61 @@
 				showView: false,
 				wx_info:{},
 				is_show:false,
-				productData:[{},{},{},{},{}]
+				productData:[{},{},{},{},{}],
+				mainData:[]
 			}
 		},
 		
 		onLoad(options) {
 			const self = this;
-			// self.$Utils.loadAll(['getMainData'], self);
+			self.name = options.name;
+			self.paginate = self.$Utils.cloneForm(self.$AssetsConfig.paginate);
+			uni.setNavigationBarTitle({
+			    title: self.name
+			});
+			self.$Utils.loadAll(['getMainData'], self);
 		},
+		
+		onReachBottom() {
+			console.log('onReachBottom')
+			const self = this;
+			if (!self.isLoadAll && uni.getStorageSync('loadAllArray')) {
+				self.paginate.currentPage++;
+				self.getMainData()
+			};
+		},
+		
 		methods: {
+			
 			getMainData() {
 				const self = this;
-				console.log('852369')
 				const postData = {};
-				postData.tokenFuncName = 'getProjectToken';
-				self.$apis.orderGet(postData, callback);
-			}
+				postData.searchItem = {
+					thirdapp_id: 2,
+				};
+				postData.getBefore = {
+					caseData: {
+						tableName: 'Label',
+						searchItem: {
+							title: ['in', [self.name]],
+						},
+						middleKey: 'category_id',
+						key: 'id',
+						condition: 'in',
+					},
+				};
+				postData.order = {
+					listorder:'desc'
+				};
+				const callback = (res) => {
+					if (res.info.data.length > 0) {
+						self.mainData.push.apply(self.mainData, res.info.data);
+					}
+					self.$Utils.finishFunc('getMainData');
+					console.log('self.mainData', self.mainData)
+				};
+				self.$apis.productGet(postData, callback);
+			},
 		}
 	};
 </script>
