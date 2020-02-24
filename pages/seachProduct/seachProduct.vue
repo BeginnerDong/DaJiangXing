@@ -39,7 +39,7 @@
 				productData:[{},{},{},{},{}],
 				mainData:[],
 				 keywords:''
-			}
+			 }
 		},
 		
 		onLoad(options) {
