@@ -14,10 +14,10 @@
 					<view class="flexRowBetween fs12 mgb10">
 						
 						<view class="color9">交易时间：{{item.create_time}}</view>
-						<view class="red" v-if="item.pat_status==0">待支付</view>
-						<view class="red" v-if="item.pat_status==1&&item.transport_status==0">待接单</view>
-						<view class="red" v-if="item.pat_status==1&&item.transport_status==1">服务中</view>
-						<view class="red" v-if="item.pat_status==1&&item.transport_status==2">已完成</view>
+						<view class="red" v-if="item.pay_status==0">待支付</view>
+						<view class="red" v-if="item.pay_status==1&&item.transport_status==0">待接单</view>
+						<view class="red" v-if="item.pay_status==1&&item.transport_status==1">服务中</view>
+						<view class="red" v-if="item.pay_status==1&&item.transport_status==2">已完成</view>
 					</view>
 					<view class="flexRowBetween" :data-id="item.id" @click="Router.navigateTo({route:{path:'/pages/userOrderDetail/userOrderDetail?id='+$event.currentTarget.dataset.id}})">
 						<view class="pic">
@@ -34,7 +34,7 @@
 					<div class="underBtn flexEnd" v-if="item.pay_status==0">
 						<span class="Bbtn" :data-id="item.id" @click="Router.navigateTo({route:{path:'/pages/userOrderConfirm/userOrderConfirm?id='+$event.currentTarget.dataset.id}})">去支付</span>
 					</div>
-					<div class="underBtn flexEnd" v-if="item.pat_status==1&&item.transport_status==1"> @click="alertShow(item.id)">
+					<div class="underBtn flexEnd" v-if="item.pay_status==1&&item.transport_status==1" @click="alertShow(item.id)"> 
 						<span class="Bbtn">确认完成</span>
 					</div>
 				</view>
@@ -47,7 +47,7 @@
 			<view class="tip-title mgb10 fs15">提示</view>
 			<view class="fs13 color6 pdb20 borderB1">该服务确定已为您完成服务？</view>
 			<view class="flex tip-button">
-				<view class="item"  @click="alertShow">取消</view>
+				<view class="item"  @click="alertShow(-1)">取消</view>
 				<view class="item pubColor"  @click="Utils.stopMultiClick(orderUpdate)">确定</view>
 			</view>
 		</view>
@@ -68,7 +68,8 @@
 					type:1,
 					thirdapp_id:2
 				},
-				willId:-1
+				willId:-1,
+				is_show:false
 			}
 		},
 		
@@ -117,6 +118,8 @@
 					uni.setStorageSync('canClick', true);
 					if (data && data.solely_code == 100000) {
 						self.$Utils.showToast('操作成功','none');
+						self.is_alertShow = !self.is_alertShow;
+						self.is_show = !self.is_show;
 						setTimeout(function() {
 							self.getMainData(true)
 						}, 1000);
@@ -151,8 +154,9 @@
 				}
 			},
 			
-			alertShow(){
+			alertShow(id){
 				const self=this;
+				self.willId = id;
 				self.is_alertShow = !self.is_alertShow;
 				self.is_show = !self.is_show;
 			},

@@ -1,6 +1,6 @@
 <template>
 	<view>
-			<view class="myaddress-lis" v-for="(item,index) in mainData" :key="index">
+			<view class="myaddress-lis" v-for="(item,index) in mainData" :key="index" @click="choose(index)">
 				<view class="name">{{item.name}}<view class="numb">{{item.phone}}</view></view>
 				<view class="adrs">{{item.city+item.detail}}</view>
 				<view class="seltBox">
@@ -71,6 +71,9 @@
 				self.choosedIndex = index;
 				uni.setStorageSync('choosedAddressData', self.mainData[index]);
 				console.log('choosedIndex', self.choosedIndex);
+				uni.navigateBack({
+					delta:1
+				})
 			},
 
 			getMainData() {
