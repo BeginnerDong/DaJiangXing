@@ -48,8 +48,7 @@
 				self.keywords = options.keywords;
 			}
 			self.paginate = self.$Utils.cloneForm(self.$AssetsConfig.paginate);
-			self.$Utils.loadAll(['getMainData'], self);
-			// self.$Utils.loadAll(['getMainData'], self);
+			
 		},
 		
 		onReachBottom() {
