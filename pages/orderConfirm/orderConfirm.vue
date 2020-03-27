@@ -49,7 +49,7 @@
 					<view class="item flexRowBetween">
 						<view class="ll fs13">微信号</view>
 						<view class="rr fs12">
-							<input type="text" v-model="wechat" placeholder="请输入微信号,以便客服联系" placeholder-class="placeholder" />
+							<input type="text" v-model="wechat" placeholder="请输入微信号,以便客服联系(选填)" placeholder-class="placeholder" />
 						</view>
 					</view>
 				</view>
@@ -162,11 +162,11 @@
 					self.$Utils.showToast('请选择收货地址', 'none')
 					return
 				};
-				if (self.wechat == '') {
+				/* if (self.wechat == '') {
 					uni.setStorageSync('canClick', true);
 					self.$Utils.showToast('请输入微信号', 'none')
 					return
-				};
+				}; */
 				var data = {
 					wechat:self.wechat
 				}
