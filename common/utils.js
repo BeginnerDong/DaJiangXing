@@ -82,7 +82,7 @@ export default {
 			};
 		};
 		wx.uploadFile({
-			url: 'https://jinyuly.com/api/public/index.php/api/v1/Base/FtpFile/upload',
+			url: 'https://www.senyuzhuangshi.com/api/public/index.php/api/v1/Base/FtpFile/upload',
 			filePath: filePath,
 			name: name,
 			formData: formData,
